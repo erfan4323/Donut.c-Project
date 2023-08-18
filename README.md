@@ -34,16 +34,16 @@ Well, let’s start with the basic math behind 3D perspective rendering. The fol
 
 # ![Math](https://www.a1k0n.net/img/perspective.png)
 
-To render a 3D object onto a 2D screen, we project each point **(x,y,z)** in 3D-space onto a plane located **z’** units away from the viewer, so that the corresponding 2D position is **(x’,y’)**. Since we’re looking from the side, we can only see the **y** and **z** axes, but the math works the same for the **x** axis (just pretend this is a top view instead). This projection is really easy to obtain: 
+To render a 3D object onto a 2D screen, we project each point **$(x,y,z)$** in 3D-space onto a plane located **z’** units away from the viewer, so that the corresponding 2D position is **$(x’,y’)$**. Since we’re looking from the side, we can only see the **y** and **z** axes, but the math works the same for the **x** axis (just pretend this is a top view instead). This projection is really easy to obtain: 
 
-notice that the origin, the *y-axis*, and point **(x,y,z)** form a right triangle, and a similar right triangle is formed with **$$(x’,y’,z’)**. Thus the relative proportions are maintained:
+notice that the origin, the *y-axis*, and point **$(x, y, z)$** form a right triangle, and a similar right triangle is formed with **$(x’,y’,z’)$**. Thus the relative proportions are maintained:
 
 $$\frac{y’}{z’} = \frac{y}{z}$$   
 $$y’ = \frac{y z’}{z}$$
 
-So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance **z’**. Since **z’** is a fixed constant, and not functionally a coordinate, let’s rename it to **$K_{1}$**, so our projection equation becomes $(x’, y’) = (\frac{K_{1} x}{z}, \frac{K_{1} y}{z})$ We can choose **$K_{1}$** arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at **(50,50)**; and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then **$K_{1}$** should be chosen so that the projection of the point **$x=10, z=5$** is still on the screen with **$x’ < 50: 10K1/5 < 50$**, or **$K1 < 25$**.
+So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance **z’**. Since **z’** is a fixed constant, and not functionally a coordinate, let’s rename it to **$K_{1}$**, so our projection equation becomes $(x’, y’) = (\frac{K_{1} x}{z}, \frac{K_{1} y}{z})$ We can choose **$K_{1}$** arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at **$(50,50)$**; and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then **$K_{1}$** should be chosen so that the projection of the point **$x=10, z=5$** is still on the screen with **$x’ < 50: 10K1/5 < 50$**, or **$K1 < 25$**.
 
-When we’re plotting a bunch of points, we might end up plotting different points at the same **(x’,y’)** location but at different depths, so we maintain a [z-buffer](https://www.wikiwand.com/en/Z-buffering) which stores the **z** coordinate of everything we draw. If we need to plot a location, we first check to see whether we’re plotting in front of what’s there already. It also helps to compute **$z^{-1} = \frac{1}{z}$** and use that when depth buffering because:
+When we’re plotting a bunch of points, we might end up plotting different points at the same **$(x’,y’)$** location but at different depths, so we maintain a [z-buffer](https://www.wikiwand.com/en/Z-buffering) which stores the **z** coordinate of everything we draw. If we need to plot a location, we first check to see whether we’re plotting in front of what’s there already. It also helps to compute **$z^{-1} = \frac{1}{z}$** and use that when depth buffering because:
 
 - **$z^{-1} = 0$** corresponds to infinite depth, so we can pre-initialize our ***z-buffer*** to 0 and have the background be infinitely far away
 - we can re-use **$z^{-1}$** when computing **x’** and **y’** : Dividing once and multiplying by **z-1** twice is cheaper than dividing by **z** twice.
@@ -52,7 +52,7 @@ Now, how do we draw a donut, AKA [torus](https://www.wikiwand.com/en/Torus)? Wel
 
 # ![a cross-section through the center of a torus](https://www.a1k0n.net/img/torusxsec.png)
 
-So we have a circle of radius $R_{1}$ centered at point **($R_{2}$,0,0)**, drawn on the *xy-plane*. We can draw this by sweeping an angle (*let’s call it θ*) from **0** to **2π**:
+So we have a circle of radius $R_{1}$ centered at point **$(R_{2},0,0)$**, drawn on the *xy-plane*. We can draw this by sweeping an angle (*let’s call it θ*) from **0** to **2π**:
 
 $$(x, y, z) = (R2, 0, 0) + (R_{1} cosθ, R_{1} sinθ, 0)$$
 
@@ -85,7 +85,7 @@ cosB & sinB & 0\\
 \end{pmatrix}
 $$
 
-Churning through the above gets us an **(x,y,z)** point on the surface of our torus, rotated around two axes, centered at the origin. To actually get screen coordinates, we need to:
+Churning through the above gets us an **$(x,y,z)$** point on the surface of our torus, rotated around two axes, centered at the origin. To actually get screen coordinates, we need to:
 
 - Move the torus somewhere in front of the viewer (the viewer is at the origin) — so we just add some constant to **z** to move it backward.
 - Project from 3D onto our 2D screen.
@@ -136,7 +136,7 @@ $$
 
 ## So which lighting direction should we choose?
 
-How about we light up surfaces facing behind and above the viewer: **(0, 1, −1)**. Technically this should be a normalized unit vector, and this vector has a magnitude of $\sqrt{2}$. That’s okay – we will compensate later. Therefore we compute the above **(x, y, z)**, throw away the **x** and get our luminance $L = y-z$.
+How about we light up surfaces facing behind and above the viewer: **$(0, 1, −1)$**. Technically this should be a normalized unit vector, and this vector has a magnitude of $\sqrt{2}$. That’s okay – we will compensate later. Therefore we compute the above **$(x, y, z)$**, throw away the **x** and get our luminance $L = y-z$.
 
 $$
 L = (N_{x}, N_{y}, N_{z}) . (0, 1, -1) = cos\varphi cos\theta sinB - cosA cos\theta sin\varphi - sinA sin\theta + cosB(cosA sin\theta - cos\theta sinA sin\varphi)
