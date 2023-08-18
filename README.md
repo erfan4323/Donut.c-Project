@@ -1,5 +1,4 @@
 # Donut.c
----
 ### So there is the donut that I heavily inspired from an article, I want to write it here for my use but if you want to check it out by yourself, feel free to visit [Donut math: how donut.c works](https://www.a1k0n.net/2011/07/20/donut-math.html "Donut Article")
 
 ## This is the code:
